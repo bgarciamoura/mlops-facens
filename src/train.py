@@ -52,8 +52,12 @@ def git_dirty() -> bool:
     ainda é o commit anterior (com outros parâmetros/código). Com git_dirty=true,
     o git_commit indica só a BASE; o retrato fiel do treino é o commit seguinte,
     que contém o dvc.lock com os hashes de tudo que foi usado.
+
+    Só olha o que afeta o modelo (código, parâmetros, pipeline e ponteiros de dados):
+    notebooks abertos ou o dvc.lock (que o próprio `dvc repro` reescreve) não contam.
     """
-    return bool(git("status", "--porcelain", "--untracked-files=no"))
+    relevantes = ["src", "params.yaml", "dvc.yaml", "data"]
+    return bool(git("status", "--porcelain", "--untracked-files=no", "--", *relevantes))
 
 
 train = pd.read_csv("data/split/train.csv", parse_dates=["dteday"])
