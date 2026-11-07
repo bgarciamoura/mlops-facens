@@ -69,13 +69,13 @@ stages:
         train:
           learning_rate: 0.1
           max_iter: 300
-          max_leaf_nodes: 31
+          max_leaf_nodes: 15
           random_state: 42
     outs:
     - path: models
       hash: md5
-      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
-      size: 1086313
+      md5: 1a73e84746df6bc9dab3a623467ea4f1.dir
+      size: 548713
       nfiles: 2
   evaluate:
     cmd: python src/evaluate.py
@@ -86,8 +86,8 @@ stages:
       size: 36709
     - path: models
       hash: md5
-      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
-      size: 1086313
+      md5: 1a73e84746df6bc9dab3a623467ea4f1.dir
+      size: 548713
       nfiles: 2
     - path: src/bike.py
       hash: md5
@@ -100,7 +100,7 @@ stages:
     outs:
     - path: metrics.json
       hash: md5
-      md5: 089eda1cc8c105524d5a14b9328125fa
+      md5: f9a466333f7911f677ddf6dfc64e1bfc
       size: 86
   plot:
     cmd: python src/plot.py
@@ -111,8 +111,8 @@ stages:
       size: 36709
     - path: models
       hash: md5
-      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
-      size: 1086313
+      md5: 1a73e84746df6bc9dab3a623467ea4f1.dir
+      size: 548713
       nfiles: 2
     - path: src/bike.py
       hash: md5
@@ -125,5 +125,5 @@ stages:
     outs:
     - path: reports/previsto_vs_real.png
       hash: md5
-      md5: 6936d123ab025cba45b0230f59b1353b
-      size: 144149
+      md5: 53eac169d47f1927cffda77e557cd3a3
+      size: 144466
