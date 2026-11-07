@@ -32,3 +32,25 @@ stages:
     - mlflow
     outs:
     - models
+
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - src/evaluate.py
+    - src/bike.py
+    - models
+    - data/split/test.csv
+    metrics:
+    - metrics.json:
+        cache: false
+
+  plot:
+    cmd: python src/plot.py
+    deps:
+    - src/plot.py
+    - src/bike.py
+    - models
+    - data/split/test.csv
+    plots:
+    - reports/previsto_vs_real.png:
+        cache: false

@@ -77,3 +77,53 @@ stages:
       md5: 0c504f3a49ff88f7b18a5238cff89959.dir
       size: 1086313
       nfiles: 2
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/split/test.csv
+      hash: md5
+      md5: 61194dbf3e988fed8cb6219dc7756c04
+      size: 36709
+    - path: models
+      hash: md5
+      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
+      size: 1086313
+      nfiles: 2
+    - path: src/bike.py
+      hash: md5
+      md5: c2d8efdd8a57a65e92810794ba981855
+      size: 1911
+    - path: src/evaluate.py
+      hash: md5
+      md5: df677a43004c332897b3f0630b4c732c
+      size: 761
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 089eda1cc8c105524d5a14b9328125fa
+      size: 86
+  plot:
+    cmd: python src/plot.py
+    deps:
+    - path: data/split/test.csv
+      hash: md5
+      md5: 61194dbf3e988fed8cb6219dc7756c04
+      size: 36709
+    - path: models
+      hash: md5
+      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
+      size: 1086313
+      nfiles: 2
+    - path: src/bike.py
+      hash: md5
+      md5: c2d8efdd8a57a65e92810794ba981855
+      size: 1911
+    - path: src/plot.py
+      hash: md5
+      md5: 687a520f301d4c62b7557831af2c1d03
+      size: 1336
+    outs:
+    - path: reports/previsto_vs_real.png
+      hash: md5
+      md5: 6936d123ab025cba45b0230f59b1353b
+      size: 144149
