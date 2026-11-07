@@ -98,8 +98,10 @@ def promover(client: MlflowClient) -> None:
         client.set_registered_model_alias(MODEL_NAME, "champion", chall)
         anterior = f"v{champ.version}" if champ else "nenhum"
         print(f"✅ Promovido: @champion agora é v{chall} (antes: {anterior})")
+    elif champ is not None and champ.version == chall:
+        print(f"ℹ️ v{chall} já é o @champion: nada a fazer")
     else:
-        if r["decisao"] == "manter" and (champ is None or champ.version != chall):
+        if r["decisao"] == "manter":
             client.set_model_version_tag(MODEL_NAME, chall, "validation_status", "rejected")
         print(f"⏸️ Mantido: @champion continua v{champ.version if champ else '-'} | {r['motivo']}")
 

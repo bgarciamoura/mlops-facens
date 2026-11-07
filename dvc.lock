@@ -151,8 +151,8 @@ stages:
       size: 1911
     - path: src/compare_models.py
       hash: md5
-      md5: 3ecde4d94ae587ad7ef0042f03f8435e
-      size: 5259
+      md5: 200eb1162a9c4d48aeb3feb147f99d44
+      size: 5335
       isexec: true
     params:
       params.yaml:
