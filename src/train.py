@@ -2,6 +2,11 @@
 cria uma nova versão no Model Registry.
 
 A promoção (alias @champion) NÃO é automática: é uma decisão de governança.
+
+Validação temporal: os últimos `validation_days` dias do treino são separados
+para medir o modelo ANTES de olhar o teste (metrics_val.json). É nessa métrica
+que se comparam hiperparâmetros. Depois, o modelo final é retreinado com o
+treino inteiro, para não desperdiçar os dados mais recentes.
 """
 import json
 import subprocess
@@ -12,9 +17,10 @@ import mlflow
 import pandas as pd
 import yaml
 from mlflow.models import infer_signature
+from sklearn.base import clone
 from sklearn.ensemble import HistGradientBoostingRegressor
 
-from bike import MODEL_NAME, tracking_uri, xy
+from bike import MODEL_NAME, regression_metrics, time_split, tracking_uri, xy
 
 params = yaml.safe_load(open("params.yaml"))
 hp = params["train"]
@@ -28,11 +34,26 @@ def data_version() -> str:
     return yaml.safe_load(dvc_file.read_text())["outs"][0]["md5"]
 
 
-def git_commit() -> str:
+def git(*args: str) -> str:
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+        return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL).strip()
     except Exception:
-        return "desconhecido"
+        return ""
+
+
+def git_commit() -> str:
+    return git("rev-parse", "--short", "HEAD") or "desconhecido"
+
+
+def git_dirty() -> bool:
+    """True se há arquivos rastreados alterados e ainda não commitados.
+
+    No fluxo `dvc repro` -> `git commit`, o treino roda ANTES do commit: o HEAD
+    ainda é o commit anterior (com outros parâmetros/código). Com git_dirty=true,
+    o git_commit indica só a BASE; o retrato fiel do treino é o commit seguinte,
+    que contém o dvc.lock com os hashes de tudo que foi usado.
+    """
+    return bool(git("status", "--porcelain", "--untracked-files=no"))
 
 
 train = pd.read_csv("data/split/train.csv", parse_dates=["dteday"])
@@ -43,7 +64,15 @@ model = HistGradientBoostingRegressor(
     max_iter=hp["max_iter"],
     max_leaf_nodes=hp["max_leaf_nodes"],
     random_state=hp["random_state"],
+    early_stopping=hp["early_stopping"],
 )
+
+# --- Validação temporal (mesma lógica do split treino/teste, aplicada ao treino) ---
+fit_part, val_part = time_split(train, test_days=hp["validation_days"])
+X_fit, y_fit = xy(fit_part)
+X_val, y_val = xy(val_part)
+val_model = clone(model).fit(X_fit, y_fit)
+val_metrics = regression_metrics(y_val, val_model.predict(X_val))
 
 mlflow.set_tracking_uri(tracking_uri())
 mlflow.set_experiment(params["mlflow"]["experiment"])
@@ -53,10 +82,14 @@ with mlflow.start_run() as run:
     mlflow.set_tags({
         "data_version": data_version(),
         "git_commit": git_commit(),
+        "git_dirty": str(git_dirty()).lower(),
         "train_rows": len(train),
         "train_until": f"{train['dteday'].max():%Y-%m-%d}",
+        "val_from": f"{val_part['dteday'].min():%Y-%m-%d}",
     })
+    mlflow.log_metrics({f"val_{k}": v for k, v in val_metrics.items()})
 
+    # Modelo final: mesmos hiperparâmetros, treino completo
     model.fit(X, y)
 
     info = mlflow.sklearn.log_model(
@@ -79,4 +112,7 @@ json.dump(
      "model_version": info.registered_model_version},
     open("models/run.json", "w"), indent=2,
 )
-print(f"run_id={run.info.run_id} | {MODEL_NAME} versão {info.registered_model_version}")
+json.dump(val_metrics, open("metrics_val.json", "w"), indent=2)
+print(f"run_id={run.info.run_id} | {MODEL_NAME} versão {info.registered_model_version} | "
+      f"val_rmse={val_metrics['rmse']:.2f} (validação {val_part['dteday'].min():%Y-%m-%d} a "
+      f"{val_part['dteday'].max():%Y-%m-%d})")

@@ -6,6 +6,13 @@ train:
   max_iter: 300
   max_leaf_nodes: 15
   random_state: 42
+  # Explícito: o padrão "auto" do sklearn só liga com > 10.000 linhas e, ao ligar,
+  # separa 10% do treino de forma ALEATÓRIA (não temporal). Com os dados v2 ele
+  # ligaria sozinho e mudaria o treino sem ninguém perceber.
+  early_stopping: false
+  # Últimos N dias do TREINO viram validação: é nela que se escolhem hiperparâmetros.
+  # O teste (split.test_days) fica reservado para a avaliação final.
+  validation_days: 28
 
 mlflow:
   experiment: bike-demand-pipeline

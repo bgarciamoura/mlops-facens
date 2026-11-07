@@ -32,6 +32,9 @@ stages:
     - mlflow
     outs:
     - models
+    metrics:
+    - metrics_val.json:   # validação temporal: use para comparar hiperparâmetros
+        cache: false
 
   evaluate:
     cmd: python src/evaluate.py
