@@ -1,0 +1,79 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/raw/bike.csv
+      hash: md5
+      md5: fc7d423afbce5699a61ac1a8acc533b8
+      size: 562742
+    - path: src/bike.py
+      hash: md5
+      md5: c2d8efdd8a57a65e92810794ba981855
+      size: 1911
+    - path: src/prepare.py
+      hash: md5
+      md5: 73e959584caa6e71c287c05ad42dba6f
+      size: 768
+    outs:
+    - path: data/prepared
+      hash: md5
+      md5: b704520c3e69ac45102a1bc8993f4f23.dir
+      size: 469176
+      nfiles: 1
+  split:
+    cmd: python src/split.py
+    deps:
+    - path: data/prepared
+      hash: md5
+      md5: b704520c3e69ac45102a1bc8993f4f23.dir
+      size: 469176
+      nfiles: 1
+    - path: src/bike.py
+      hash: md5
+      md5: c2d8efdd8a57a65e92810794ba981855
+      size: 1911
+    - path: src/split.py
+      hash: md5
+      md5: d56a7762f0df92c5c11cf45ce4ecd828
+      size: 714
+    params:
+      params.yaml:
+        split:
+          test_days: 28
+    outs:
+    - path: data/split
+      hash: md5
+      md5: 3226a00b98276a34a1169f64098cec7c.dir
+      size: 469268
+      nfiles: 2
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/split/train.csv
+      hash: md5
+      md5: 215e4bb56ae129088236a389edcd58c2
+      size: 432559
+    - path: src/bike.py
+      hash: md5
+      md5: c2d8efdd8a57a65e92810794ba981855
+      size: 1911
+    - path: src/train.py
+      hash: md5
+      md5: ec311e4196cd3818bee5e62ba80d05fd
+      size: 2578
+    params:
+      params.yaml:
+        mlflow:
+          experiment: bike-demand-pipeline
+        train:
+          learning_rate: 0.1
+          max_iter: 300
+          max_leaf_nodes: 31
+          random_state: 42
+    outs:
+    - path: models
+      hash: md5
+      md5: 0c504f3a49ff88f7b18a5238cff89959.dir
+      size: 1086313
+      nfiles: 2

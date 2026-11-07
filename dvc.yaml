@@ -1,0 +1,34 @@
+# Pipeline do projeto. Cada estágio declara o comando (cmd), o que ele lê (deps),
+# os parâmetros do params.yaml que usa (params) e o que ele gera (outs).
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - src/prepare.py
+    - src/bike.py
+    - data/raw/bike.csv
+    outs:
+    - data/prepared
+
+  split:
+    cmd: python src/split.py
+    deps:
+    - src/split.py
+    - src/bike.py
+    - data/prepared
+    params:
+    - split
+    outs:
+    - data/split
+
+  train:
+    cmd: python src/train.py
+    deps:
+    - src/train.py
+    - src/bike.py
+    - data/split/train.csv
+    params:
+    - train
+    - mlflow
+    outs:
+    - models
