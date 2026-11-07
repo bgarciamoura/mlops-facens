@@ -14,5 +14,10 @@ train:
   # O teste (split.test_days) fica reservado para a avaliação final.
   validation_days: 28
 
+compare:
+  # O challenger só substitui o @champion se o RMSE cair pelo menos 2%:
+  # diferenças menores podem ser só ruído do período de teste.
+  margem_minima: 0.02
+
 mlflow:
   experiment: bike-demand-pipeline

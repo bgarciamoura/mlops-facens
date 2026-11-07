@@ -57,3 +57,19 @@ stages:
     plots:
     - reports/previsto_vs_real.png:
         cache: false
+
+  compare:
+    cmd: python src/compare_models.py
+    deps:
+    - src/compare_models.py
+    - src/bike.py
+    - models
+    - data/split/test.csv
+    params:
+    - compare
+    metrics:
+    - reports/comparacao.json:
+        cache: false
+    # O @champion vive no Model Registry, fora do controle do DVC: sem isto, uma
+    # promoção ou rollback não faria o DVC perceber que a comparação ficou velha.
+    always_changed: true
